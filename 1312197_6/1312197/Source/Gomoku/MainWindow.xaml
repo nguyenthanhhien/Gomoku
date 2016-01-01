@@ -1,0 +1,34 @@
+﻿<Window x:Class="Gomoku.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:logic="clr-namespace:Gomoku"
+        Title="MainWindow" Height="700" Width="1000">
+    <Grid x:Name="grid_ban_co">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="col_00" Width="6*" />
+            <ColumnDefinition x:Name="col_01" Width="3*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="row_00" Height="100*" />
+            <RowDefinition x:Name="row_01" Height="500*" />
+            <RowDefinition x:Name="row_02" Height="100*" />
+        </Grid.RowDefinitions>
+        <Canvas x:Name="ban_co"  Width="{Binding ElementName=ban_co, Path=ActualHeight}" Margin="10,10,10,10" Background="Honeydew" Grid.Row="1" Grid.Column="0" MouseDown="ban_co_MouseDown" SizeChanged="ban_co_SizeChanged" />
+        <TextBox Grid.Row="0" Grid.ColumnSpan="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="10" TextWrapping="Wrap" FontFamily="Arial" Text="Gomoku – Five in a row - multiplayer" FontSize="36" Background="#eee" BorderBrush="#FFC8CCDA" IsEnabled="False" />
+        <Label Content="Your name:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.9,0.462" FontWeight="Bold" Grid.Column="1" Grid.Row="1"/>
+        <TextBox x:Name="txt_name" HorizontalAlignment="Left" Height="28" Margin="88,10,0,0" TextWrapping="Wrap" Text="Guest" VerticalAlignment="Top" Width="102" RenderTransformOrigin="0.495,1.13" Grid.Column="1" Grid.Row="1" TextChanged="txt_name_TextChanged" GotFocus="txt_name_GotFocus"/>
+        <Label Content="Chat/History" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Width="293" Background="#FF008BFF" Foreground="#FFFBFAFA" FontWeight="Bold" Grid.Row="1" Height="45" Grid.Column="1" />
+        <Button x:Name="btn_newgame" Content="New game!" HorizontalAlignment="Left" Margin="254,10,0,0" VerticalAlignment="Top" Width="67" RenderTransformOrigin="0.446,0.5" Background="White" BorderBrush="Gray" Height="26" Grid.Column="1" Grid.Row="1" Click="btn_newgame_Click"/>
+        <Button x:Name="btn_change" Content="Change!" HorizontalAlignment="Left" Margin="195,10,0,0" VerticalAlignment="Top" Width="54" RenderTransformOrigin="0.446,0.5" Background="White" BorderBrush="Gray" Height="26" Grid.Column="1" Grid.Row="1" Click="btn_change_Click" />
+        <TextBox x:Name="txt_type"  Grid.Column="1" HorizontalAlignment="Left" Height="35" Margin="10,403,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="216" BorderBrush="#FF2154EE"/>
+        <Button x:Name="btn_send" Content="Send" Grid.Column="1" HorizontalAlignment="Left" Margin="231,403,0,0" Grid.Row="1" VerticalAlignment="Top" Width="72" Height="35" Background="#FF0B81F7" Foreground="#FFF5E7E7" FontSize="14" FontWeight="Bold" Click="btn_send_Click"/>
+        <Button x:Name="btn_player" Content="Player and player" HorizontalAlignment="Left" Margin="157,36,0,0" Grid.Row="2" VerticalAlignment="Top" Width="108" Height="32" Click="btn_player_Click"/>
+        <Button x:Name="btn_ai" Content="Player and machine" HorizontalAlignment="Left" Margin="363,36,0,0" Grid.Row="2" VerticalAlignment="Top" Width="114" Height="32" Click="btn_ai_Click" />
+        <TextBox x:Name="txt_col" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="104,10,0,0" Grid.Row="2" TextWrapping="Wrap" Text="{Binding Source= {x:Static logic:AppSetting.a}, Path=Col, Mode=OneWay}" VerticalAlignment="Top" Width="49"/>
+        <TextBox x:Name="txt_mes"  VerticalScrollBarVisibility="Auto" Grid.Column="1" HorizontalAlignment="Left" Height="288" Margin="10,110,0,0" Grid.Row="1" TextWrapping="Wrap" Text="{Binding Source= {x:Static logic:AppSetting.a}, Path=Mes, Mode=OneWay}" VerticalAlignment="Top" Width="293"/>
+        
+        <TextBox x:Name="txt_player" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="181,10,0,0" Grid.Row="2" TextWrapping="Wrap" Text="{Binding Source= {x:Static logic:AppSetting.a}, Path=Player, Mode=OneWay}" VerticalAlignment="Top" Width="45"/>
+        <TextBox x:Name="txt_row" Grid.Column="1"  HorizontalAlignment="Left" Height="23" Margin="27,10,0,0" Grid.Row="2" TextWrapping="Wrap" Text="{Binding Source= {x:Static logic:AppSetting.a}, Path=Row, Mode=OneWay}" VerticalAlignment="Top" Width="47" TextChanged="txt_row_TextChanged"/>
+        
+    </Grid>
+</Window>
