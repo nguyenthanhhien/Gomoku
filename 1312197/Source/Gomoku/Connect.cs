@@ -10,6 +10,7 @@ namespace Gomoku
 {
     public class Connect
     {
+        public static bool turn; //xét người đi trước hay máy đi trước khi máy chơi online
         public static string _name;
         public static string _mes;
         public static int dong, cot, nguoichoi;
@@ -18,12 +19,21 @@ namespace Gomoku
 
             socket.On(Socket.EVENT_CONNECT, () =>
             {
-                MessageBox.Show("Connected", "Thông báo", MessageBoxButton.OK);
+                //MessageBox.Show("Connected", "Thông báo", MessageBoxButton.OK);
 
             });
             socket.On("ChatMessage", (data) =>
             {
-               
+                string s = "You are the first player!";
+                turn = data.ToString().Contains(s);
+                if (MainWindow.type == 4 && turn == true)
+                {
+                    Application.Current.Dispatcher.Invoke((Action)(() =>
+                    {
+                        MainWindow.txt.Text = data.ToString();
+                    }));
+                   
+                }
                 string ten = "";
                 var o = JObject.Parse(data.ToString());
                 if ((string)o["from"] != null)
@@ -59,7 +69,13 @@ namespace Gomoku
                     AppSetting.a.Row = jobject.Value<int>("row");
                     AppSetting.a.Col = jobject.Value<int>("col");
                 }
-                
+                else if(MainWindow.type == 4) //máy đánh online
+                {
+                    AppSetting.a.Ai_player = jobject.Value<int>("player");
+                    AppSetting.a.Ai_row = jobject.Value<int>("row");
+                    AppSetting.a.Ai_col = jobject.Value<int>("col");
+                    
+                }
             });
             socket.On("EndGame", (data) =>
             {

@@ -18,6 +18,39 @@ namespace Gomoku
          private int col;
          private int player;
 
+         private int ai_row;
+
+         public int Ai_row
+         {
+             get { return ai_row; }
+             set
+             {
+                 ai_row = value;
+                 OnPropertyChanged("Ai_row");
+             }
+         }
+         private int ai_col;
+
+         public int Ai_col
+         {
+             get { return ai_col; }
+             set
+             {
+                 ai_col = value;
+                 OnPropertyChanged("Ai_col");
+             }
+         }
+         private int ai_player;
+
+         public int Ai_player
+         {
+             get { return ai_player; }
+             set
+             {
+                 ai_player = value;
+                 OnPropertyChanged("Ai_player");
+             }
+         }
 
          public int Col
          {

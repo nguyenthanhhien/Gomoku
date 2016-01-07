@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Newtonsoft.Json.Linq;
 using Quobject.SocketIoClientDotNet.Client;
+using System.Configuration;
 namespace Gomoku
 {
     
@@ -33,6 +34,7 @@ namespace Gomoku
         public bool Check = false; //xét lượt cho máy đánh true: máy đánh, false: người đánh
         string name = "";
         double banco_Width, banco_Height;
+        public static TextBox txt = new TextBox(); //dùng bắt sự kiện máy đánh trước khi máy đánh online
         Quobject.SocketIoClientDotNet.Client.Socket socket;
         public MainWindow()
         {
@@ -40,11 +42,15 @@ namespace Gomoku
             ban_co.IsEnabled = false;
             worker.DoWork += find_location;
             worker.RunWorkerCompleted += AI_play;
-            
+            txt.TextChanged += new TextChangedEventHandler(txt_change);
         }
         private readonly BackgroundWorker worker = new BackgroundWorker();
 
-      
+        //Khi biến turn ở Connect = true thì gọi sự kiện này
+        private void txt_change(object sender, TextChangedEventArgs e)
+        {
+            Connect.GuiToaDo(socket, 1, 1);
+        }
         private void drawEllipse(int row, int col, Brush brush) //Vẽ ellip
         {
             double top = 0, left = 0;
@@ -811,18 +817,82 @@ namespace Gomoku
             }
            
         }
-
+        
         private void btn_player_online_Click_1(object sender, RoutedEventArgs e)
         {
             type = 3;
-            socket = IO.Socket("ws://gomoku-lajosveres.rhcloud.com:8000");
+            string connect = ConfigurationManager.ConnectionStrings["LINK_GOMOKU"].ConnectionString;
+            socket = IO.Socket(connect);
             Connect.KetNoi(socket, txt_name.Text);
             drawBoard();
             ban_co.IsEnabled = true;
             PlayerWin = 0;
         }
         #endregion
-       
+        #region Máy đánh online
+        private void btn_machine_online_Click(object sender, RoutedEventArgs e)
+        {
+            type = 4;
+            string connect = ConfigurationManager.ConnectionStrings["LINK_GOMOKU"].ConnectionString;
+            socket = IO.Socket(connect);
+            Connect.KetNoi(socket, txt_name.Text);
+            drawBoard();
+            ban_co.IsEnabled = true;
+            PlayerWin = 0;
+        }
+
+        private void btn_ai_row_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            int p = AppSetting.a.Ai_player;
+            int r = AppSetting.a.Ai_row;
+            int c = AppSetting.a.Ai_col;
+            if (caro[r, c] != 0)
+                return;
+            if(p == 1)
+            {
+                drawEllipse(r, c, Brushes.Blue);
+                caro[r, c] = 1;
+                Point temp = ai_FindWay();
+                AI_row = (int)temp.X;
+                AI_col = (int)temp.Y;
+                Connect.GuiToaDo(socket, AI_row, AI_col);
+                
+            }
+            if(p == 0)
+            {
+                drawEllipse(r, c, Brushes.Red);
+                caro[r, c] = 2;
+            }
+           
+        }
+
+        private void btn_ai_col_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            int p = AppSetting.a.Ai_player;
+            int r = AppSetting.a.Ai_row;
+            int c = AppSetting.a.Ai_col;
+            
+            if (caro[r, c] != 0)
+                return;
+            if (p == 1)
+            {
+                drawEllipse(r, c, Brushes.Blue);
+                caro[r, c] = 1;
+                Point temp = ai_FindWay();
+                AI_row = (int)temp.X;
+                AI_col = (int)temp.Y;
+                Connect.GuiToaDo(socket, AI_row, AI_col);
+                
+            }
+            if (p == 0)
+            {
+                drawEllipse(r, c, Brushes.Red);
+                caro[r, c] = 2;
+            }
+
+        }
+        #endregion
+
         private void txt_mes_TextChanged(object sender, TextChangedEventArgs e)
         {
 
