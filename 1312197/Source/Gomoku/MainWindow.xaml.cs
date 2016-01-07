@@ -651,7 +651,7 @@ namespace Gomoku
         }   
         private void find_location(object sender, DoWorkEventArgs e)  //Tìm vị trí cho máy đánh
         {
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             Point temp = ai_FindWay();
             AI_row = (int)temp.X;
             AI_col = (int)temp.Y;
