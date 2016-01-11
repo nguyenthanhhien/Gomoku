@@ -24,7 +24,7 @@ namespace Gomoku
     {
         public const int n = 12;
         int[,] caro = new int[n, n];
-        int count = 0;
+       
         public int PlayerWin = 0;//biến xác định người nào chơi thắng
         public int player = 0; //player = 1: người chơi thứ nhất, player = 2: người chơi thứ 2
         public static int type = 0; //type = 1: người chơi với người, type = 2: người chơi với máy
@@ -410,173 +410,157 @@ namespace Gomoku
         #endregion
 
 
-        #region kiểm tra chéo xuôi \
-        public bool KiemTraCheoXuoi(int row, int col, int Player)
+     
+        #region xử lý kết thúc game
+        // Kiểm tra hàng dọc
+        public int Kt_Doc(int row, int col)
         {
-            bool kt = false;
-            count = 1;
-            for (int i = row; i < n - 1; i++)
+            int count = 1;
+            int temp = caro[row, col];
+            int b = col;
+            while (((col - 1) >= 0) && (caro[row, col - 1] == temp))
             {
-                if(col <11)
-                {
-                    if (caro[i, col] == Player && caro[i + 1, col + 1] == Player)
-                    {
-                        count++;
-                        col += 1;
-                        if (count == 5)
-                        {
-                            kt = true;
-                            count = 0;
-                            return kt;
-                        }
-                    }
-                }
-                    
+                count++;
+                col--;
             }
-            col = col - count + 1;
-            for (int i = row; i > 0; i--)
-            {
-                if (col > 0) 
-                {
-                    if (caro[i, col] == Player && caro[i - 1, col - 1] == Player)
-                    {
-                        count++;
-                        col -= 1;
-                        if (count == 5)
-                        {
-                            kt = true;
-                            count = 0;
-                            return kt;
-                        }
-                    }
-                }
 
+            col = b;
+
+            while (((col + 1) < 11) && (caro[row, col + 1] == temp))
+            {
+                count++;
+                col++;
             }
-            
-            return kt;
+            if (count >= 5)
+                return 1;
+            else return 0;
         }
-        #endregion
 
-        #region kiểm tra chéo ngược /
-        public bool KiemTraCheoNguoc(int row, int col, int Player)
+        // Kiểm tra hàng ngang
+        public int Kt_Ngang(int row, int col)
         {
-            bool kt = false;
-            count = 1;
-            for (int i = row; i > 0; i--)
+            int count = 1;
+            int temp = caro[row, col];
+            int a = row;
+            while (((row - 1) >= 0) && (caro[row - 1, col] == temp))
             {
-                if (col < 11)
-                {
-                    if (caro[i, col] == Player && caro[i - 1, col + 1] == Player)
-                    {
-                        count++;
-                        col += 1;
-                        if (count == 5)
-                        {
-                            kt = true;
-                            count = 0;
-                            return kt;
-                        }
-                    }
-                }
+                count++;
+                row--;
             }
-            col = col - count + 1;
+            row = a;
+            while (((row + 1) < 11) && (caro[row + 1, col] == temp))
+            {
+                count++;
+                row++;
+            }
+
+            if (count >= 5)
+                return 1;
+            else return 0;
+        }
+
+        // Kiểm tra đường chéo 1
+        public int Kt_Cheo1(int row, int col)
+        {
+            int count = 1;
+            int temp = caro[row, col];
+            int a = row;
+            int b = col;
+            while (((row - 1) >= 0) && ((col - 1) >= 0) && (caro[row - 1, col - 1] == temp))
+            {
+                count++;
+                row--;
+                col--;
+            }
+
+            row = a;
+            col = b;
+
+            while (((row + 1) < 11) && ((col + 1) < 11) && (caro[row + 1, col + 1] == temp))
+            {
+                count++;
+                row++;
+                col++;
+            }
+
+            if (count >= 5)
+                return 1;
+            else return 0;
+        }
+
+        // Kiểm tra đường chéo 2
+        public int Kt_Cheo2(int row, int col)
+        {
+            int count = 1;
+            int temp = caro[row, col];
+            int a = row;
+            int b = col;
+            while (((row - 1) >= 0) && ((col + 1) < 11) && (caro[row - 1, col + 1] == temp))
+            {
+                count++;
+                row--;
+                col++;
+            }
+
+            row = a;
+            col = b;
+
+            while (((row + 1) < 11) && ((col - 1) >= 0) && (caro[row + 1, col - 1] == temp))
+            {
+                count++;
+                row++;
+                col--;
+            }
+
+            if (count >= 5)
+                return 1;
+            else return 0;
+        }
+
+        // kiểm tra kết thúc game
+        public void Result(int row, int col)
+        {
+            player = caro[row, col];
+
+            if ((Kt_Ngang(row, col) == 1) || (Kt_Doc(row, col) == 1) || (Kt_Cheo1(row, col) == 1) || (Kt_Cheo2(row, col) == 1))
+                PlayerWin = player;
+            if (type == 1)
+            {
+                if (PlayerWin == 1)
+                {
+                    MessageBox.Show("Người chơi bi màu đỏ thắng!");
+                    ban_co.IsEnabled = false;
+                    return;
+                }
+
+                else if (PlayerWin == 2)
+                {
+                    MessageBox.Show("Người chơi bị màu xanh thắng!");
+                    ban_co.IsEnabled = false;
+                    return;
+                }
+
+            }
+            else if (type == 2)
+            {
+                if (PlayerWin == 1)
+                {
+                    MessageBox.Show("Người chơi bi màu đỏ thắng!");
+                    ban_co.IsEnabled = false;
+                    return;
+                }
+
+                else if (PlayerWin == 2)
+                {
+                    MessageBox.Show("Máy đã thắng!");
+                    ban_co.IsEnabled = false;
+                    return;
+                }
+
+            }
            
-            for (int i = row; i < n - 1; i++)
-            {
-                if(col > 0)
-                if (caro[i, col] == Player && caro[i + 1, col - 1] == Player)
-                {
-                    count++;
-                    col -= 1;
-                    if (count == 5)
-                    {
-                        kt = true;
-                        count = 0;
-                        return kt;
-                    }
-                }
-
-            }
-            
-         
-            
-            return kt;
-        }
-
-        #endregion
-        #region kiểm tra dòng
-        public bool KiemTraDong(int row, int col, int Player)
-        {
-            bool kt = false;
-            count = 1;
-            for (int i = row; i < n - 1;i++)
-            {
-                if (caro[i, col] == Player && caro[i+1, col] == Player)
-                {
-                    count++;
-                    if(count == 5)
-                    {
-                        kt = true;
-                        count = 0;
-                        return kt;
-                    }
-                }
-            }
-            for (int i = row; i > 0;i--)
-            {
-                if (caro[i, col] == Player && caro[i - 1, col] == Player)
-                {
-                    count++;
-                    if (count == 5)
-                    {
-                        kt = true;
-                        count = 0;
-                        return kt;
-                    }
-                }
-            }
-
-            return kt;
         }
         #endregion
-        #region kiểm tra cột
-        public bool KiemTraCot(int row, int col, int Player)
-        {
-            bool kt = false;
-          
-            count = 1;
-            for (int i = col; i < n - 1; i++)
-            {
-                if (caro[row, i] == Player && caro[row, i+1] == Player)
-                {
-                    count++;
-                    if (count == 5)
-                    {
-                        kt = true;
-                        count = 0;
-                        return kt;
-                    }
-                }
-            }
-            for (int i = col; i > 0; i--)
-            {
-                if (caro[row, i] == Player && caro[row, i-1] == Player)
-                {
-                    count++;
-                    if (count == 5)
-                    {
-                        kt = true;
-                        count = 0;
-                        return kt;
-                    }
-                }
-            }
-
-            return kt;
-       
-        }
-        #endregion
-        
         public void SetTurn(int row, int col) //Xét lượt chơi cho người
         {
             if (turn % 2 == 0)
@@ -593,55 +577,7 @@ namespace Gomoku
             
             turn++;
         }
-        private void Result(int row, int col)  //Kiểm tra kết quả chơi
-        {
-            player = caro[row, col];
-            if (KiemTraDong(row, col, player) == true)
-                PlayerWin = player;
-            else if (KiemTraCot(row, col, player) == true)
-                PlayerWin = player;
-            else if (KiemTraCheoXuoi(row, col, player) == true)
-                PlayerWin = player;
-            else if (KiemTraCheoNguoc(row, col, player) == true)
-                PlayerWin = player;
-            if(type == 1)
-            {
-                if (PlayerWin == 1)
-                {
-                    MessageBox.Show("Người chơi bi màu đỏ thắng!");
-                    ban_co.IsEnabled = false;
-                    return;
-                }
-                    
-                else if (PlayerWin == 2)
-                {
-                    MessageBox.Show("Người chơi bị màu xanh thắng!");
-                    ban_co.IsEnabled = false;
-                    return;
-                }
-                   
-            }
-            else if(type == 2)
-            {
-                if (PlayerWin == 1)
-                {
-                    MessageBox.Show("Người chơi bi màu đỏ thắng!");
-                    ban_co.IsEnabled = false;
-                    return;
-                }
-
-                else if (PlayerWin == 2)
-                {
-                    MessageBox.Show("Máy đã thắng!");
-                    ban_co.IsEnabled = false;
-                    return;
-                }
-                   
-            }
-            
-                
-        } 
-
+      
         private void AI_play(object sender, RunWorkerCompletedEventArgs e) //Máy đánh
         {
             caro[AI_row, AI_col] = 2;
@@ -668,6 +604,7 @@ namespace Gomoku
                 check = true;
                 return;
             }
+            check = false;
             if(type == 1) //người đánh với người
             {
                 if(check == false)
