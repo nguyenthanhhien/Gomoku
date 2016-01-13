@@ -34,23 +34,19 @@ namespace Gomoku
         public bool Check = false; //xét lượt cho máy đánh true: máy đánh, false: người đánh
         string name = "";
         double banco_Width, banco_Height;
-        public static TextBox txt = new TextBox(); //dùng bắt sự kiện máy đánh trước khi máy đánh online
         Quobject.SocketIoClientDotNet.Client.Socket socket;
         public MainWindow()
         {
             InitializeComponent();
+           
             ban_co.IsEnabled = false;
+            for (int x = 0; x < n; x++)
+                for (int y = 0; y < n; y++)
+                    caro[x, y] = 0;
             worker.DoWork += find_location;
             worker.RunWorkerCompleted += AI_play;
-            txt.TextChanged += new TextChangedEventHandler(txt_change);
         }
         private readonly BackgroundWorker worker = new BackgroundWorker();
-
-        //Khi biến turn ở Connect = true thì gọi sự kiện này
-        private void txt_change(object sender, TextChangedEventArgs e)
-        {
-            Connect.GuiToaDo(socket, 1, 1);
-        }
         private void drawEllipse(int row, int col, Brush brush) //Vẽ ellip
         {
             double top = 0, left = 0;
@@ -62,12 +58,6 @@ namespace Gomoku
             elip.SetValue(Canvas.LeftProperty, left);
             elip.Fill = brush;
             ban_co.Children.Add(elip);
-        }
-        
-        private void btn_send_Click(object sender, RoutedEventArgs e) //Gởi tin nhắn
-        {
-            Connect.GoiTinNhan(socket, txt_type.Text, name);
-            txt_type.Text = "";
         }
 
         #region tim diem may danh
@@ -408,8 +398,6 @@ namespace Gomoku
             return Sum;
         }
         #endregion
-
-
      
         #region xử lý kết thúc game
         // Kiểm tra hàng dọc
@@ -574,30 +562,79 @@ namespace Gomoku
                 drawEllipse(row, col, Brushes.Blue);
 
             }
-            
+           
             turn++;
+            
         }
-      
+        #region offline
         private void AI_play(object sender, RunWorkerCompletedEventArgs e) //Máy đánh
         {
             caro[AI_row, AI_col] = 2;
             drawEllipse(AI_row, AI_col, Brushes.Blue);
+            bool Hoa = Kiem_tra_hoa();
+            if (Hoa == true)
+            {
+                MessageBox.Show("Hai người chơi hòa nhau!");
+                ban_co.IsEnabled = false;
+                return;
+            }
             Result(AI_row, AI_col);
             Check = false;
         }   
         private void find_location(object sender, DoWorkEventArgs e)  //Tìm vị trí cho máy đánh
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(100);
             Point temp = ai_FindWay();
             AI_row = (int)temp.X;
             AI_col = (int)temp.Y;
         } 
+        bool Kiem_tra_hoa()
+        {
+            bool kt_hoa = true;
+            for (int x = 0; x < n; x++)
+            {
+                for (int y = 0; y < n; y++)
+                {
+                    if (caro[x, y] == 0)
+                    {
+                        kt_hoa = false;
+                        break;
+                    }
+                   
+                }
+                
+               
+            }
+            return kt_hoa;  
+                    
+        }
+        private void btn_player_Click(object sender, RoutedEventArgs e)//Người đánh với người
+        {
+            ban_co.IsEnabled = true;
+            type = 1;
+            for (int x = 0; x < n; x++)
+                for (int y = 0; y < n; y++)
+                    caro[x, y] = 0;
+            drawBoard();
+            PlayerWin = 0;
+        }
+        private void btn_ai_Click(object sender, RoutedEventArgs e)//Người đánh với máy
+        {
+            ban_co.IsEnabled = true;
+            type = 2;
+            for (int x = 0; x < n; x++)
+                for (int y = 0; y < n; y++)
+                    caro[x, y] = 0;
+            drawBoard();
+            PlayerWin = 0;
+        }
+        #endregion
         private void ban_co_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Point p = e.GetPosition((IInputElement)sender);
             Row = (int)(p.Y / banco_Width);
             Col = (int)(p.X / banco_Width);
-            
+            bool hoa = false;
             if(caro[Row, Col] != 0)
             {
                 MessageBox.Show("Vị trí này đã được đánh");
@@ -607,20 +644,36 @@ namespace Gomoku
             check = false;
             if(type == 1) //người đánh với người
             {
+                 
                 if(check == false)
                 {
                     SetTurn(Row, Col);
+                    hoa = Kiem_tra_hoa();
+                    if (hoa == true)
+                    {
+                        MessageBox.Show("Hai người chơi hòa nhau!");
+                        ban_co.IsEnabled = false;
+                        return;
+                    }
                     Result(Row, Col);
                 }
             }
             else if(type == 2) //người đánh với máy
             {
+               
                 if(check == false) //kiểm tra đánh trùng
                 {
                     if (Check == false) //người đánh trước
                     {
                         caro[Row, Col] = 1;
                         drawEllipse(Row, Col, Brushes.Red);
+                        hoa = Kiem_tra_hoa();
+                        if (hoa == true)
+                        {
+                            MessageBox.Show("Hai người chơi hòa nhau!");
+                            ban_co.IsEnabled = false;
+                            return;
+                        }
                         Result(Row, Col);
                         if (PlayerWin == 1)
                             return;
@@ -645,15 +698,29 @@ namespace Gomoku
         }
         private void ban_co_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+           
             drawBoard();
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    if (caro[i, j] == 1)
+                    {
+                        drawEllipse(i, j, Brushes.Red);
+                    }
+                    else if (caro[i, j] == 2)
+                    {
+                        drawEllipse(i, j, Brushes.Blue);
+                    }
+                }
+            }
+           
         }
         void drawBoard()//Vẽ bàn cờ
         {
-            for (int x = 0; x < n; x++)
-                for (int y = 0; y < n; y++)
-                    caro[x, y] = 0;
-            banco_Width = banco_Height = ban_co.ActualWidth / 12;
             ban_co.Children.Clear();
+            
+            banco_Width = banco_Height = ban_co.ActualWidth / 12;
             
             for (int i = 0; i < n; i++)
             {
@@ -677,21 +744,7 @@ namespace Gomoku
             }
             
         }
-        private void btn_player_Click(object sender, RoutedEventArgs e)//Người đánh với người
-        {
-            ban_co.IsEnabled = true;
-            type = 1;
-            drawBoard();
-            PlayerWin = 0;
-        }
-
-        private void btn_ai_Click(object sender, RoutedEventArgs e)//Người đánh với máy
-        {
-            ban_co.IsEnabled = true;
-            type = 2;
-            drawBoard();
-            PlayerWin = 0;
-        }
+        
         private void btn_change_Click(object sender, RoutedEventArgs e) //Đổi tên
         {
             Connect.DoiTen(socket, txt_name.Text);
@@ -700,31 +753,33 @@ namespace Gomoku
         {
             txt_name.Text = "";
         }
+        private void btn_send_Click(object sender, RoutedEventArgs e) //Gởi tin nhắn
+        {
+            Connect.GoiTinNhan(socket, txt_type.Text, name);
+            txt_type.Text = "";
+            
+        }
+       
         #region Người đánh online
         private void txt_row_TextChanged(object sender, TextChangedEventArgs e)
         {
             int p = AppSetting.a.Player;
             int r = AppSetting.a.Row;
             int c = AppSetting.a.Col;
+            if (caro[r, c] != 0)
+            {
+                return;
+            }
             if (p == 0)
             {
-                if (caro[r, c] != 0)
-                {
-                    return;
-                }
-                else
-                    drawEllipse(r, c, Brushes.Red);
+                drawEllipse(r, c, Brushes.Red);
+                caro[r, c] = 1;
             }
 
-            else if (p == 1)
+            if (p == 1)
             {
-                if (caro[r, c] != 0)
-                {
-                    return;
-                }
-                else
-                    drawEllipse(r, c, Brushes.Blue);
-
+                drawEllipse(r, c, Brushes.Blue);
+                caro[r, c] = 2;
             }
         }
       
@@ -733,24 +788,20 @@ namespace Gomoku
             int p = AppSetting.a.Player;
             int r = AppSetting.a.Row;
             int c = AppSetting.a.Col;
+            if(caro[r,c] != 0)
+            {
+                return;
+            }
             if (p == 0)
             {
-                if(caro[r,c] != 0)
-                {
-                    return;
-                }
-                else
-                    drawEllipse(r, c, Brushes.Red);
+                drawEllipse(r, c, Brushes.Red);
+                caro[r, c] = 1;
             }
 
-            else if (p == 1)
+            if (p == 1)
             {
-                if (caro[r, c] != 0)
-                {
-                    return;
-                }
-                else
-                    drawEllipse(r, c, Brushes.Blue);
+                drawEllipse(r, c, Brushes.Blue);
+                caro[r, c] = 2;
             }
            
         }
@@ -758,24 +809,39 @@ namespace Gomoku
         private void btn_player_online_Click_1(object sender, RoutedEventArgs e)
         {
             type = 3;
+            ban_co.IsEnabled = true;
+        
+            for (int x = 0; x < n; x++)
+                for (int y = 0; y < n; y++)
+                    caro[x, y] = 0;
+            drawBoard();
+            PlayerWin = 0;
             string connect = ConfigurationManager.ConnectionStrings["LINK_GOMOKU"].ConnectionString;
             socket = IO.Socket(connect);
             Connect.KetNoi(socket, txt_name.Text);
-            drawBoard();
-            ban_co.IsEnabled = true;
-            PlayerWin = 0;
+         
+            
         }
         #endregion
         #region Máy đánh online
         private void btn_machine_online_Click(object sender, RoutedEventArgs e)
         {
             type = 4;
+            ban_co.IsEnabled = true;
+            for (int x = 0; x < n; x++)
+                for (int y = 0; y < n; y++)
+                    caro[x, y] = 0;
+            drawBoard();
+            PlayerWin = 0;
             string connect = ConfigurationManager.ConnectionStrings["LINK_GOMOKU"].ConnectionString;
             socket = IO.Socket(connect);
             Connect.KetNoi(socket, txt_name.Text);
-            drawBoard();
-            ban_co.IsEnabled = true;
-            PlayerWin = 0;
+           
+            
+        }
+        private void btn_turn_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Connect.GuiToaDo(socket, 1, 1);
         }
 
         private void btn_ai_row_TextChanged(object sender, TextChangedEventArgs e)
@@ -830,9 +896,7 @@ namespace Gomoku
         }
         #endregion
 
-        private void txt_mes_TextChanged(object sender, TextChangedEventArgs e)
-        {
+       
 
-        }
     }
 }

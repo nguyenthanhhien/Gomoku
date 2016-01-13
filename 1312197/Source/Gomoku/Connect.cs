@@ -28,10 +28,11 @@ namespace Gomoku
                 turn = data.ToString().Contains(s);
                 if (MainWindow.type == 4 && turn == true)
                 {
-                    Application.Current.Dispatcher.Invoke((Action)(() =>
-                    {
-                        MainWindow.txt.Text = data.ToString();
-                    }));
+                    //Application.Current.Dispatcher.Invoke((Action)(() =>
+                    //{
+                    //    MainWindow.txt.Text = data.ToString();
+                    //}));
+                    AppSetting.a.First += data.ToString();
                    
                 }
                 string ten = "";

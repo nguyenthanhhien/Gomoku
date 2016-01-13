@@ -92,6 +92,16 @@ namespace Gomoku
             }
         }
 
+        private string first;
+        public string First
+        {
+            get { return first; }
+            set
+            {
+                first = value;
+                OnPropertyChanged("First");
+            }
+        }
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChangedEventHandler handler = PropertyChanged;
